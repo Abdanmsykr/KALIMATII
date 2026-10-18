@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kalimati – Prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@500;700&family=Poppins:wght@400;600&display=swap">
+<style>
+:root{--g:#1B5E20;--gold:#C9A227;--bg:#FFF8E7;--card:#fff;--tx:#212121;--mut:#555;--ok:#2E7D32;--no:#C62828;--bd:#cfd8c8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--g:#2f8f3a;--bg:#14170f;--card:#1f2418;--tx:#f2f2f2;--mut:#bbb;--bd:#3b4430;--ok:#66bb6a;--no:#ef7a7a}}
+:root[data-theme="dark"]{--g:#2f8f3a;--bg:#14170f;--card:#1f2418;--tx:#f2f2f2;--mut:#bbb;--bd:#3b4430;--ok:#66bb6a;--no:#ef7a7a}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.4 Poppins,system-ui,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:420px;height:100%;display:flex;flex-direction:column}
+.ar{font-family:"Noto Naskh Arabic","Amiri",serif;direction:rtl;line-height:1.9}
+header{background:var(--g);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;min-height:56px}
+header h1{font-size:18px;margin:0;flex:1}header .ar{font-size:18px}
+main{flex:1;overflow-y:auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:12px}
+button{font:inherit;cursor:pointer;min-height:48px;border-radius:12px;border:1px solid var(--g);padding:10px 14px;background:var(--card);color:var(--g);width:100%;margin-top:8px}
+button.p{background:var(--g);color:#fff}button.a{background:var(--gold);color:#212121;border-color:var(--gold);font-weight:600}
+button.back{width:auto;min-height:40px;margin:0;background:transparent;color:#fff;border-color:#fff}
+input{width:100%;min-height:48px;border-radius:12px;border:1px solid var(--g);padding:10px;margin-top:8px;background:var(--card);color:var(--tx);font:inherit}
+.big{font-size:40px;text-align:center;font-weight:700}.mid{font-size:24px;text-align:right}
+.bar{height:10px;background:var(--bd);border-radius:6px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;background:var(--gold)}
+.err{color:var(--no);margin-top:8px}.row{display:flex;gap:8px}.row button{flex:1}
+.opt.ok{background:var(--ok);color:#fff;border-color:var(--ok)}.opt.no{background:var(--no);color:#fff;border-color:var(--no)}.opt.sel{outline:3px solid var(--gold)}
+nav{display:flex;border-top:1px solid var(--bd);background:var(--card)}
+nav button{margin:0;border:0;border-radius:0;min-height:56px;font-size:12px;color:var(--mut)}nav button.on{color:var(--g);font-weight:600}
+.mut{color:var(--mut)}.c{text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var W=[["مَدْرَسَةٌ","madrasatun","sekolah","أَذْهَبُ إِلَى الْمَدْرَسَةِ","Saya pergi ke sekolah"],
+["كِتَابٌ","kitābun","buku","هَذَا كِتَابٌ","Ini sebuah buku"],
+["قَلَمٌ","qalamun","pena","مَعِي قَلَمٌ","Saya membawa pena"],
+["طَالِبٌ","ṭālibun","siswa","هُوَ طَالِبٌ","Dia seorang siswa"],
+["مُدَرِّسٌ","mudarrisun","guru","هُوَ مُدَرِّسٌ","Dia seorang guru"],
+["فَصْلٌ","faṣlun","kelas","الْفَصْلُ نَظِيفٌ","Kelas itu bersih"],
+["سَبُّورَةٌ","sabbūratun","papan tulis","السَّبُّورَةُ كَبِيرَةٌ","Papan tulis itu besar"],
+["مَكْتَبَةٌ","maktabatun","perpustakaan","أَقْرَأُ فِي الْمَكْتَبَةِ","Saya membaca di perpustakaan"]];
+var S={page:"login",i:0,seen:{},best:0,hard:{},q:[],qi:0,score:0,sel:-1,checked:false,wrong:[],err:false,mode:"theme"};
+var $=function(x){return document.getElementById(x)};
+function shuffle(a){return a.slice().sort(function(){return Math.random()-.5})}
+function pct(){return Math.round(Object.keys(S.seen).length/W.length*100)}
+function go(p){S.page=p;render()}
+function speak(t){try{var u=new SpeechSynthesisUtterance(t);u.lang="ar-SA";speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}$("au")&&($("au").textContent="🔊 Memutar…")}
+function nav(a){var t=[["home","🏠","Beranda"],["learn","📚","Materi"],["quiz0","✏️","Latihan"],["prog","📈","Progress"]];
+return "<nav>"+t.map(function(x){return '<button class="'+(a===x[0]?"on":"")+'" onclick="go(\''+x[0]+'\')">'+x[1]+"<br>"+x[2]+"</button>"}).join("")+"</nav>"}
+function hd(t,back){return "<header>"+(back?'<button class="back" onclick="go(\''+back+'\')">← Kembali</button>':"")+"<h1>"+t+"</h1></header>"}
+function startQuiz(hard){var pool=hard?W.filter(function(w){return S.hard[w[0]]}):W;if(!pool.length)pool=W;
+S.q=shuffle(pool).slice(0,5);S.qi=0;S.score=0;S.sel=-1;S.checked=false;S.wrong=[];S.page="quiz";render()}
+function opts(){var c=S.q[S.qi],o=shuffle(W.filter(function(w){return w[0]!==c[0]})).slice(0,3).concat([c]);return shuffle(o)}
+var O=[];
+function render(){var p=S.page,h="";
+if(p==="login"){h='<main><div class="c" style="margin-top:40px"><div class="ar big" style="color:var(--g)">كَلِمَاتِي</div><div class="mut">Satu kata setiap hari</div></div><div class="card" style="margin-top:24px"><input id="u" placeholder="Nama pengguna" value="raihan"><input id="pw" type="password" placeholder="Kata sandi (demo: 1234)">'+(S.err?'<div class="err">✖ Nama pengguna atau kata sandi salah. Coba lagi.</div>':"")+'<button class="a" onclick="login()"><span class="ar" style="font-size:20px">تَسْجِيلُ الدُّخُولِ</span><br>Masuk</button><button onclick="alert(\'Reset kata sandi (simulasi)\')">Lupa kata sandi?</button></div></main>'}
+if(p==="home"){var n=Object.keys(S.hard).length;h=hd('Halo, Raihan <span class="ar">مَرْحَبًا بِكَ</span>')+'<main><div class="card"><b>Lanjutkan: Tema Sekolah</b><div class="bar"><i style="width:'+pct()+'%"></i></div><span class="mut">'+pct()+'% dipelajari</span><button class="a" onclick="go(\'learn\')"><span class="ar" style="font-size:20px">اِبْدَأِ التَّعَلُّمَ</span><br>Mulai Belajar</button></div><div class="row"><button onclick="go(\'learn\')">📚<br>Materi</button><button onclick="go(\'quiz0\')">✏️<br>Latihan</button></div><div class="card" style="margin-top:12px">Kata Sulit: <b>'+n+'</b> kata<button onclick="startQuiz(true)" '+(n?"":"disabled")+'>Ulangi Kata Sulit</button></div><button onclick="S.err=false;go(\'login\')">Keluar</button></main>'+nav("home")}
+if(p==="learn"){var w=W[S.i];S.seen[w[0]]=1;h=hd("Tema Sekolah · "+(S.i+1)+" / 8","home")+'<main><div class="card"><div class="ar big">'+w[0]+'</div><div class="c mut">'+w[1]+'</div><div class="c"><b>Arti: '+w[2]+'</b></div><button class="p" id="au" onclick="speak(\''+w[0]+'\')"><span class="ar" style="font-size:18px">اِسْتَمِعْ</span> · Dengarkan</button></div><div class="card"><div class="mut">Contoh:</div><div class="ar mid">'+w[3]+'</div><div class="mut">"'+w[4]+'"</div></div><div class="row"><button onclick="S.i=Math.max(0,S.i-1);render()" '+(S.i?"":"disabled")+'>← Sebelumnya</button><button onclick="S.i=Math.min(7,S.i+1);render()" '+(S.i<7?"":"disabled")+'>Berikutnya →</button></div><button class="a" onclick="startQuiz(false)">Mulai Latihan</button></main>'+nav("learn")}
+if(p==="quiz0"){h=hd("Latihan","home")+'<main><div class="card">Tema Sekolah · 5 soal pilihan ganda.<button class="a" onclick="startQuiz(false)">Mulai Latihan</button></div></main>'+nav("quiz0")}
+if(p==="quiz"){var c=S.q[S.qi];if(S.sel<0&&!S.checked)O=opts();
+h=hd("Latihan · "+(S.qi+1)+" / 5","learn")+'<main><div class="bar"><i style="width:'+(S.qi/5*100)+'%"></i></div><div class="card"><div class="c">Apa arti kata ini?</div><div class="ar big">'+c[0]+'</div><button onclick="speak(\''+c[0]+'\')"><span class="ar" style="font-size:18px">اِسْتَمِعْ</span> 🔊</button></div>'+O.map(function(o,k){var cl="opt";if(S.checked){if(o[0]===c[0])cl+=" ok";else if(k===S.sel)cl+=" no"}else if(k===S.sel)cl+=" sel";return '<button class="'+cl+'" onclick="pick('+k+')">'+((S.checked&&o[0]===c[0])?"✔ ":(S.checked&&k===S.sel?"✖ ":""))+o[2]+"</button>"}).join("")+(S.checked?'<div class="card" style="margin-top:12px">'+(O[S.sel][0]===c[0]?'<b style="color:var(--ok)">✔ Benar!</b>':'<b style="color:var(--no)">✖ Salah.</b> Jawaban benar: '+c[2])+' <span class="ar">'+c[0]+'</span></div><button class="a" onclick="next()">'+(S.qi<4?"Soal berikutnya":"Lihat hasil")+'</button>':'<button class="p" onclick="check()" '+(S.sel<0?"disabled":"")+'><span class="ar" style="font-size:18px">تَحَقَّقْ</span> · Periksa</button>')+'</main>'}
+if(p==="prog"||p==="result"){var res=p==="result";h=hd(res?"Hasil Latihan":"Progress",res?"quiz0":"home")+'<main>'+(res?'<div class="card c"><div style="font-size:48px;color:var(--g);font-weight:600">'+S.score*20+' / 100</div><div>Benar '+S.score+' | Salah '+(5-S.score)+'</div><div class="mut">'+(S.score>=4?"Bagus, terus semangat!":"Ayo ulangi, kamu pasti bisa!")+'</div></div>'+(S.wrong.length?'<div class="card"><b>Kata yang perlu diulang:</b>'+S.wrong.map(function(w){return '<div><span class="ar mid">'+w[0]+"</span> = "+w[2]+"</div>"}).join("")+'<button class="p" onclick="startQuiz(true)">Ulangi Kata Sulit</button></div>':""):"")+(res?"":'<div class="card"><b>Progress per tema</b><div>Sekolah — '+pct()+'%</div><div class="bar"><i style="width:'+pct()+'%"></i></div><div>Skor terbaik: '+S.best*20+'</div><div class="mut">Keluarga, Rumah, Makanan: segera hadir</div></div>')+'<button class="'+(res?"":"a")+'" onclick="go(\'home\')">Kembali ke Dashboard</button></main>'+nav("prog")}
+$("app").innerHTML=h}
+function login(){var u=$("u").value.trim(),pw=$("pw").value;if(u&&pw==="1234"){S.err=false;go("home")}else{S.err=true;render()}}
+function pick(k){if(!S.checked){S.sel=k;render()}}
+function check(){var c=S.q[S.qi];S.checked=true;if(O[S.sel][0]===c[0]){S.score++;delete S.hard[c[0]]}else{S.hard[c[0]]=1;S.wrong.push(c)}render()}
+function next(){if(S.qi<4){S.qi++;S.sel=-1;S.checked=false;render()}else{S.best=Math.max(S.best,S.score);go("result")}}
+render();
+</script>
+</body>
+</html>
